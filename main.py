@@ -38,12 +38,13 @@ def main():
 
 def build_plot(training_set_inputs, training_set_outputs):
 
-    m, c, e = lineardep.least_squares(
+    m, c, _ = lineardep.least_squares(
         training_set_inputs, training_set_outputs)
     p1, = plt.plot(training_set_inputs, m * training_set_inputs + c)
-    m, c, e = lineardep.neural_network(training_set_inputs,
+    m, c, _ = lineardep.neural_network(training_set_inputs,
                                        training_set_outputs, TRAINING_COEFFICIENT)
     p2, = plt.plot(training_set_inputs, m * training_set_inputs + c)
+
     plt.plot(training_set_inputs, training_set_outputs, 'og')
 
     plt.legend([p1, p2], ['Least squares', 'Neural network'])
