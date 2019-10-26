@@ -14,6 +14,7 @@ def main():
     training_set_outputs = np.array(
         [[3.6], [4.4], [5.8], [6.2], [7.4], [8], [9.2], [10.4], [11.8]])
 
+
     m, c, e = lineardep.least_squares(
         training_set_inputs, training_set_outputs)
 
