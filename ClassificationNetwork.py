@@ -1,18 +1,10 @@
 import math
+import asyncio
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 SIGMA = 0.1
-
-fig = plt.figure()
-ax = fig.add_subplot(111)
-legend_map = {
-    1: 'or',
-    2: 'ob',
-    3: 'og',
-    4: 'om',
-}
 
 
 class ClassificationNetwork:
@@ -20,33 +12,33 @@ class ClassificationNetwork:
     def __init__(self, training_inputs):
         self.weights = training_inputs
 
-    def classificate(self, classified_point):
+    def __teach__(self, training_inputs):
+        for class_ in training_inputs:
+            for point in class_:
+                self.weights = np.append(self.weights, point)
+        self.weights = np.reshape(self.weights, (20, 2))
+        return self.weights
+
+    def classify(self, classified_point):
+        result = self.__template_layer__(classified_point)
+        return self.__output_layer__(result) + 1
+
+    def __template_layer__(self, classified_point):
         distances = []
-        result = [-math.inf]
+        result = []
         for class_ in self.weights:
             for point in class_:
-                w_x1 = (point[0] - classified_point[0])**2
-                w_x2 = (point[1] - classified_point[1])**2
-                distances.append(math.exp(-((w_x1 + w_x2) / SIGMA**2)))
+                distances.append(self.__activation_function__(
+                    point, classified_point))
             result.append(sum(distances))
             distances.clear()
-        self.__output_layer__(result, classified_point)
+        return result
 
-    def __output_layer__(self, result, classified_point):
+    def __activation_function__(self, point_1, point_2):
+        w_x1 = (point_1[0] - point_2[0])**2
+        w_x2 = (point_1[1] - point_2[1])**2
+        return math.exp(-((w_x1 + w_x2) / SIGMA**2))
+
+    def __output_layer__(self, result):
         min_elem = max(result)
-        print(result.index(min_elem))
-        self.plot(classified_point)
-
-    def plot(self, point):
-        k = 1
-        p = []
-        for class_array in self.weights:
-            for j in enumerate(class_array):
-                p1, = plt.plot(class_array[:, 0],
-                               class_array[:, 1], legend_map[k])
-            p.append(p1)
-            k += 1
-        p1, = plt.plot(point[0], point[1], '+r')
-        ax.legend(p, ["class1", "class2", "class3", "class4"])
-        ax.grid(True)
-        plt.show()
+        return result.index(min_elem)

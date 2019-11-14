@@ -8,6 +8,18 @@ import classnition
 import ClassificationNetwork
 
 
+DENSITY = 0.02
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+legend_map = {
+    1: 'or',
+    2: 'ob',
+    3: 'og',
+    4: 'om',
+}
+
+
 def init_arrays():
     class1 = np.array([[0.05, 0.91],
                        [0.14, 0.96],
@@ -33,7 +45,6 @@ def init_arrays():
                        [0.89, 0.3],
                        [0.77, 0.2]])
 
-
     classes = np.array([class1,
                         class2,
                         class3,
@@ -41,6 +52,8 @@ def init_arrays():
                         ])
 
     return classes
+
+network = ClassificationNetwork.ClassificationNetwork(init_arrays())
 
 
 def generate_random_point():
@@ -50,10 +63,50 @@ def generate_random_point():
 
 def main():
     classes = init_arrays()
-    network = ClassificationNetwork.ClassificationNetwork(classes)
+    fig.canvas.mpl_connect('button_press_event', onclick)
+    plot(classes)
     point = generate_random_point()
-    network.classificate(generate_random_point())
+    affiliation = network.classify(point)
+    update_plot(point, affiliation)
+    ax.set_title('The point ' + str(point) +
+                 ' belongs to ' + str(affiliation) + ' class')
+    plt.show()
 
+
+def color_map(network):
+    for x in np.arange(0, 1, DENSITY):
+        for y in np.arange(0, 1, DENSITY):
+            affiliation = network.classify(np.array([x, y]))
+            update_plot(np.array([x, y]), affiliation)
+    fig.canvas.draw()
+    plt.show()
+
+
+def update_plot(point, affiliation):
+    plt.plot(point[0], point[1], legend_map[affiliation], markersize=12)
+
+
+def plot(classes):
+    fig.canvas.mpl_connect('button_press_event', onclick)
+    k = 1
+    p = []
+    for class_array in classes:
+        for j in enumerate(class_array):
+            p1, = plt.plot(class_array[:, 0],
+                           class_array[:, 1], legend_map[k])
+        p.append(p1)
+        k += 1
+    ax.legend(p, ["class1", "class2", "class3", "class4"])
+    ax.grid(True)
+
+
+def onclick(event):
+    affiliation = network.classify(np.array([event.xdata, event.ydata]))
+    plt.plot(event.xdata, event.ydata,
+            legend_map[affiliation])
+    ax.set_title('The point ' + str(np.array([event.xdata, event.ydata])) +
+                 ' belongs to ' + str(affiliation) + ' class')
+    plt.show()
 
 
 if __name__ == "__main__":
